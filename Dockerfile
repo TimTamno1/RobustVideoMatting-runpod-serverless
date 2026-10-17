@@ -16,12 +16,12 @@ RUN apt-get update ${APT_OPTS} \
 
 # Pin FFmpeg: distro/conda builds often lack libvpx_vp9/prores_ks or use different CLI options.
 # BtbN static build; autobuild tags use versioned asset names (not ffmpeg-master-latest-*).
-ARG FFMPEG_RELEASE=autobuild-2026-02-15-13-00
-ARG FFMPEG_ASSET=ffmpeg-N-122750-g6ee3e59ce2-linux64-gpl.tar.xz
-RUN wget -q "https://github.com/BtbN/FFmpeg-Builds/releases/download/${FFMPEG_RELEASE}/${FFMPEG_ASSET}" -O /tmp/ffmpeg.tar.xz \
-    && tar -xJf /tmp/ffmpeg.tar.xz -C /opt \
-    && mv /opt/ffmpeg-N-122750-g6ee3e59ce2-linux64-gpl /opt/ffmpeg \
-    && rm /tmp/ffmpeg.tar.xz
+ARG FFMPEG_URL=https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz
+RUN wget -q "${FFMPEG_URL}" -O /tmp/ffmpeg.tar.xz \
+    && mkdir -p /opt/ffmpeg \
+    && tar -xJf /tmp/ffmpeg.tar.xz -C /opt/ffmpeg --strip-components=1 \
+    && rm /tmp/ffmpeg.tar.xz \
+    && /opt/ffmpeg/bin/ffmpeg -hide_banner -encoders | grep -E "libvpx-vp9|prores_ks"
 ENV PATH="/opt/ffmpeg/bin:${PATH}"
 
 RUN git clone --depth 1 https://github.com/PeterL1n/RobustVideoMatting.git /app/RobustVideoMatting \
